@@ -444,7 +444,7 @@ def display_p_value_chart(df_selected):
 
 def main():
     st.title("🔎 Dados de Instrumentação - Barragem Paiva Castro")
-    monthy_df, corr_df = update_and_load_data()
+    monthy_df, corr_df, df_selected = update_and_load_data()
     display_attendance_dashboard1(monthy_df)
     display_attendance_dashboard2(monthy_df)
     display_attendance_dashboard3(monthy_df)
