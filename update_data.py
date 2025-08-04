@@ -158,4 +158,4 @@ def analisar_e_salvar(all_dataframes):
     df_corr_real = calcular_correlacao_mensal(todos_nos)
     df_corr_real['Month'] = pd.to_datetime(df_corr_real['Month'].astype(str)).dt.to_period('M').dt.to_timestamp()
 
-    return monthy_selecionado, df_corr_real
+    return monthy_selecionado, df_corr_real, df_selected
