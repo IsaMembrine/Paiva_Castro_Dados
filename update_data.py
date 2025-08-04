@@ -26,7 +26,7 @@ except (ModuleNotFoundError, FileNotFoundError, KeyError):
     )
 
 base_url = 'https://loadsensing.wocs3.com'
-urls = [f'{base_url}/27920/dataserver/node/view/{nid}' for nid in [1006, 1007, 1008, 1010, 1011, 1012]]
+urls = [f'{base_url}/27821/dataserver/node/view/{nid}' for nid in [1003, 1004, 1007, 1011, 1013, 1015, 1019, 1020, 1023, 1028, 1031, 1034, 1036, 2004, 2011, 2016, 2021, 5001, 5002, 5003, 5004, 5005, 6001, 9001, 9002, 9003]]
 
 def coletar_links():
     all_file_links = {}
