@@ -126,35 +126,49 @@ def calcular_correlacao_mensal(todos_nos):
     return pd.DataFrame(correlacoes)
 
 def analisar_e_salvar(all_dataframes):
-    first_node = list(all_dataframes.keys())[0]
-    todos_nos = all_dataframes[first_node].copy()
+    # Junta todos os DataFrames com rótulo de Node_ID
+    dfs_com_nodo = []
     for node_id, df in all_dataframes.items():
-        if node_id != first_node and 'Date-and-time' in df.columns:
-            todos_nos = pd.merge(todos_nos, df, on='Date-and-time', how='outer', suffixes=('', f'_{node_id}'))
+        if 'Date-and-time' in df.columns:
+            df['Node_ID'] = node_id
+            df['Date-and-time'] = pd.to_datetime(df['Date-and-time'], errors='coerce')
+            df.dropna(subset=['Date-and-time'], inplace=True)
+            df['Date'] = df['Date-and-time'].dt.date
+            df['Time_Rounded'] = df['Date-and-time'].dt.round('h').dt.time
+            df['Month'] = df['Date-and-time'].dt.to_period('M')
+            dfs_com_nodo.append(df)
 
-    todos_nos['Date-and-time'] = pd.to_datetime(todos_nos['Date-and-time'], errors='coerce')
-    todos_nos.dropna(subset=['Date-and-time'], inplace=True)
-    todos_nos['Date'] = todos_nos['Date-and-time'].dt.date
-    todos_nos['Time_Rounded'] = todos_nos['Date-and-time'].dt.round('h').dt.time
-    todos_nos['Month'] = todos_nos['Date-and-time'].dt.to_period('M')
+    # Junta todos os nós verticalmente
+    todos_nos = pd.concat(dfs_com_nodo, ignore_index=True)
 
-    df_cleaned = todos_nos.copy()
-    df_cleaned.drop_duplicates(subset=['Date', 'Time_Rounded'], inplace=True)
-    p_cols = [c for c in df_cleaned.columns if c.startswith('p-')]
-    df_selected = df_cleaned[['Date-and-time', 'Time_Rounded'] + p_cols].copy()
-    melted = df_selected.melt(id_vars=['Date-and-time', 'Time_Rounded'], value_vars=p_cols,
-                              var_name='Node_p_Column', value_name='Value')
+    # Filtra colunas de pressão (p-...) que possuem Ch1
+    p_cols = [col for col in todos_nos.columns if re.match(r'p-\d+-Ch1', col)]
+    df_selected = todos_nos[['Date-and-time', 'Date', 'Time_Rounded', 'Node_ID'] + p_cols].copy()
+
+    # Derrete os dados para normalizar leitura por Node_ID
+    melted = df_selected.melt(
+        id_vars=['Date-and-time', 'Date', 'Time_Rounded', 'Node_ID'],
+        value_vars=p_cols,
+        var_name='Node_p_Column',
+        value_name='Value'
+    )
     melted.dropna(subset=['Value'], inplace=True)
     melted['Month'] = melted['Date-and-time'].dt.to_period('M')
-    melted['Node_ID'] = melted['Node_p_Column'].apply(lambda x: x.split('-')[1])
+
+    # ✅ Remove duplicatas dentro do mesmo Node_ID + horário arredondado
+    melted.drop_duplicates(subset=['Node_ID', 'Date', 'Time_Rounded'], inplace=True)
+
+    # Calcula presença mensal
     counts = melted.groupby(['Month', 'Node_ID']).size().reset_index(name='Monthly_Data_Count')
     counts['Days_in_Month'] = counts['Month'].dt.days_in_month
-    counts['Max_Data'] = counts['Days_in_Month'] * 24
+    counts['Max_Data'] = counts['Days_in_Month'] * 24  # 24 leituras por dia (1/h)
     counts['Monthly_Attendance_Percentage'] = (counts['Monthly_Data_Count'] / counts['Max_Data']) * 100
-    monthy_selecionado = counts[['Month', 'Node_ID', 'Monthly_Attendance_Percentage']].copy()
 
+    # Ajusta formato da data
+    monthy_selecionado = counts[['Month', 'Node_ID', 'Monthly_Attendance_Percentage']].copy()
     monthy_selecionado['Month'] = pd.to_datetime(monthy_selecionado['Month'].astype(str)).dt.to_period('M').dt.to_timestamp()
 
+    # Correlação entre pressão e frequência por nó
     df_corr_real = calcular_correlacao_mensal(todos_nos)
     df_corr_real['Month'] = pd.to_datetime(df_corr_real['Month'].astype(str)).dt.to_period('M').dt.to_timestamp()
 
