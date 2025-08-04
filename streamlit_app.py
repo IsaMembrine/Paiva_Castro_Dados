@@ -412,6 +412,36 @@ def display_correlation_dashboard5(df_corr):
     else:
         st.warning("Dados de correlação não disponíveis.")
 
+def display_p_value_chart(df_selected):
+    st.header("📊 Valores de p por Nó ao longo do Tempo")
+
+    if not df_selected.empty and {'Node_ID', 'Month', 'P_Value'}.issubset(monthy_df.columns):
+        # Filtra nós que começam com "100"
+        filtered_df = df_selected[df_selected["Node_ID"].astype(str).str.startswith("100")]
+
+        if not filtered_df.empty:
+            node_options = sorted(filtered_df["Node_ID"].unique())
+            selected_node = st.selectbox("Selecione um Piezômetro (Valor p):", node_options)
+
+            df_filtrado = filtered_df[filtered_df["Node_ID"] == selected_node].copy()
+            df_filtrado['Month_Str'] = pd.to_datetime(df_filtrado['Month']).dt.strftime('%Y-%m')
+
+            fig = px.line(
+                df_filtrado,
+                x="Month_Str",
+                y="P_Value",
+                labels={"Month_Str": "Data", "P_Value": "Valor p"},
+                title=f"Valor p ao longo do tempo - Nó {selected_node}",
+                markers=True
+            )
+            fig.update_layout(xaxis_title="Data", yaxis_title="Valor p", yaxis_range=[0, 1])
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("⚠️ Não há dados de nós que comecem com '100'.")
+    else:
+        st.warning("⚠️ As colunas necessárias ('Node_ID', 'Month', 'P_Value') não estão disponíveis.")
+
+
 def main():
     st.title("🔎 Dados de Instrumentação - Barragem Paiva Castro")
     monthy_df, corr_df = update_and_load_data()
@@ -425,6 +455,7 @@ def main():
     display_correlation_dashboard3(corr_df)
     display_correlation_dashboard4(corr_df)
     display_correlation_dashboard5(corr_df)
+    display_p_value_chart(df_selected)
 
 if __name__ == "__main__":
     main()
