@@ -22,7 +22,7 @@ def update_and_load_data():
 def display_attendance_dashboard(df, prefix, label):
     filtered_df = df[df["Node_ID"].astype(str).str.startswith(prefix)]
     if not filtered_df.empty:
-        node_id = st.selectbox(f"Selecione um {label} (Presença):", sorted(filtered_df["Node_ID"].unique()))
+        node_id = st.selectbox(f"Selecione um {label} (Presençaxxxx):", sorted(filtered_df["Node_ID"].unique()))
         df_filtrado = filtered_df[filtered_df["Node_ID"] == node_id].sort_values(by='Month')
         df_filtrado['Month_Str'] = pd.to_datetime(df_filtrado['Month']).dt.strftime('%B')
         fig = px.bar(
