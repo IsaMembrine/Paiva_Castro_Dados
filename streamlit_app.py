@@ -13,9 +13,9 @@ def update_and_load_data():
             file_links = coletar_links()
             downloaded_files = baixar_arquivos(file_links)
             all_dataframes = processar_arquivos(downloaded_files)
-            monthy_df, corr_df = analisar_e_salvar(all_dataframes)
+            monthy_df, corr_df, df_selected = analisar_e_salvar(all_dataframes)
         st.success("✅ Dados atualizados com sucesso!")
-        return monthy_df, corr_df
+        return monthy_df, corr_df, df_selected
     except Exception as e:
         st.error(f"Erro durante atualização: {e}")
         return pd.DataFrame(), pd.DataFrame()
