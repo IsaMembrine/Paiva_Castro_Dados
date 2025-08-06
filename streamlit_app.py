@@ -69,7 +69,7 @@ def display_correlation_dashboard(df, prefix, label):
 def display_p_value_chart(df_selected):
     st.subheader("📊 Valores de p por Nó")
     if not df_selected.empty and {'Node_ID', 'Month', 'P_Value'}.issubset(df_selected.columns):
-        filtered_df = df_selected[df_selected["Node_ID"].astype(str).str.startswith("100")]
+        filtered_df = df_selected[df_selected["Node_ID"].astype(str).str.startswith("10")]
         if not filtered_df.empty:
             selected_node = st.selectbox("Selecione um Piezômetro (Valor p):", sorted(filtered_df["Node_ID"].unique()))
             df_filtrado = filtered_df[filtered_df["Node_ID"] == selected_node].copy()
@@ -96,18 +96,18 @@ def main():
     tab1, tab2, tab3 = st.tabs(["📊 Presença", "📈 Correlação", "🧪 Valor p"])
 
     with tab1:
-        display_attendance_dashboard(monthy_df, "100", "Piezômetro")
-        display_attendance_dashboard(monthy_df, "200", "NA")
-        display_attendance_dashboard(monthy_df, "500", "MT")
-        display_attendance_dashboard(monthy_df, "600", "Tiltímetro")
-        display_attendance_dashboard(monthy_df, "900", "LT")
+        display_attendance_dashboard(monthy_df, "10", "Piezômetro")
+        display_attendance_dashboard(monthy_df, "20", "NA")
+        display_attendance_dashboard(monthy_df, "50", "MT")
+        display_attendance_dashboard(monthy_df, "60", "Tiltímetro")
+        display_attendance_dashboard(monthy_df, "90", "LT")
 
     with tab2:
-        display_correlation_dashboard(corr_df, "100", "Piezômetro")
-        display_correlation_dashboard(corr_df, "200", "NA")
-        display_correlation_dashboard(corr_df, "500", "MT")
-        display_correlation_dashboard(corr_df, "600", "Tiltímetro")
-        display_correlation_dashboard(corr_df, "900", "LT")
+        display_correlation_dashboard(corr_df, "10", "Piezômetro")
+        display_correlation_dashboard(corr_df, "20", "NA")
+        display_correlation_dashboard(corr_df, "50", "MT")
+        display_correlation_dashboard(corr_df, "60", "Tiltímetro")
+        display_correlation_dashboard(corr_df, "90", "LT")
 
     with tab3:
         display_p_value_chart(df_selected)
